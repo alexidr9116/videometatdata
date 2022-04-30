@@ -44,7 +44,7 @@ const getUploadedSize =async (req,res)=>{
             },
             {
                 $group:{
-                    _id:'$videoId',
+                    _id:null,
                     uploadedSize:{$sum: '$videoSize'}
                 }
             }
