@@ -33,7 +33,9 @@ mongoose
         DATABASE_CONNECTION,
         option
     )
-    .then(() => console.log("MongoDB successfully connected"))
+    .then(() => {
+        // console.log("MongoDB successfully connected")
+    })
     .catch(err => console.log(err));
 
 const assetFolder = path.resolve(__dirname, './build/');
@@ -42,13 +44,10 @@ const uploadsFolder = path.resolve(__dirname, './uploads/');
 // Passport config 
 // Routes
 app.use("/api/video/", videoRoute);
- 
-app.use("/uploads", express.static('uploads'))
-app.use(express.static(assetFolder));
-app.use("*", express.static(assetFolder))
+  
 const port = process.env.PORT || 5555; // process.env.port is Heroku's port if you choose to deploy the app there
 const server = app.listen(port, () => {
-    console.log(`Server up and running on port ${port} !`)
+    // console.log(`Server up and running on port ${port} !`)
 
 });
 module.exports = app;
