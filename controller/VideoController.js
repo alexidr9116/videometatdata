@@ -1,36 +1,42 @@
 const { validationResult } = require("express-validator");
 const User = require("../models/UserModel");
-const VideoMetadata = require("../models/VideoMetadataModel");
+const VideoMetadata = require("../models/VideoMetadata");
 const ObjectId = require('mongoose').Types.ObjectId;
 const fs = require("fs");
 const ResponseData = require("../utils/ResponseData");
+const createSeedData  = async(req,res)=>{
 
+}
 const getUploadedSize =async (req,res)=>{
     try{
-        const creator = await User.findByAny(req.params.creator);
-        if(creator && creator!=null){
-            const data = await VideoMetadata.aggregate([
-                {
-                    $match:{
-                        creator:creator._id
-                    }
-                },
-                {
-                    $group:{
-                        _id:{creator},
-                        uploadedSize:{$sum: fileSize}
-                    }
+        const data = await VideoMetadata.aggregate([
+            {
+                $match:{
+                    createdBy:req.params.createdBy
                 }
-            ])
-            ResponseData.ok(res,"",{data});
-        }
-        else{
-            ResponseData.error(res,"Can not find user by Username or email");
-        }
+            },
+            {
+                $lookup:{
+                    from:"videocreated",
+                    localField:"videoId",
+                    foreignField:"videoId",
+                    as:"createdBy"
+                }
+            },
+            {
+                $group:{
+                    _id:{videoId},
+                    uploadedSize:{$sum: videoSize}
+                }
+            }
+        ])
+
+        res.status(200).json(data);
+        
     }
     catch(err){
         console.log(err);
-        ResponseData.error(res,"Server error",{err});
+        res.status(201).json(err);
     }
 
 }
@@ -38,16 +44,17 @@ const getVideoMetadata = async (req,res)=>{
     try{
 
         const data = await VideoMetadata.aggregate([
-            {$match:{_id:ObjectId(req.body.id)}},
-            {$lookup:{from:"users",localField:"creator",foreignField:"_id",as:"createdBy"}},
+            {$match:{videoId:(req.body.id)}},
+            {$lookup:{from:"videocreated",localField:"videoId",foreignField:"videoId",as:"createdBy"}},
             {$unwind:"$createdBy"},
-            {$project:{viewCount:1,fileSize:1,createdBy:1}}
+            {$project:{viewCount:1,videoSize:1,createdBy:1}}
         ])
-        ResponseData.ok(res,"",{data});
+        res.status(200).json(data);
     }
     catch(err){
         console.log(err);
-        ResponseData.error(res,"Server error",{err});
+        res.status(201).json(err);
+    
     }
 
 
@@ -55,24 +62,26 @@ const getVideoMetadata = async (req,res)=>{
 const updateVideoMetadata = async (req,res)=>{
     var result = validationResult(req);
     if (!result.isEmpty()) {
-        return ResponseData.error(res, "Validation error", result);
+        return res.status(201).json({err:result});
     }
     try{
-        const {viewCount, fileSize, id} = req.body;
-        const data = await VideoMetadata.findByIdAndUpdate(ObjectId(id),
+        const {viewCount, videoSize, id} = req.body;
+        const data = await VideoMetadata.findOneAndUpdate(
         {
-            viewCount,fileSize
+            videoId:id
+        },
+        {
+            viewCount,videoSize
         });
-        ResponseData.ok(res,"",{data});
+        res.status(200).json(data);
     }
     catch(err){
         console.log(err);
-        ResponseData.error(res,"Server error",{err});
+        res.status(201).json(err);
     }
 }
 module.exports = {
     getUploadedSize,
     getVideoMetadata,
     updateVideoMetadata
-
 }
