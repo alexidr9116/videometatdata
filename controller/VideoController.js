@@ -63,11 +63,12 @@ const getVideoMetadata = async (req,res)=>{
     try{
 
         const data = await VideoMetadata.aggregate([
-            {$match:{videoId:(req.body.id)}},
-            {$lookup:{from:"videocreated",localField:"videoId",foreignField:"videoId",as:"createdBy"}},
+            {$match:{videoId:(req.params.id)}},
+            {$lookup:{from:"videocreateds",localField:"videoId",foreignField:"videoId",as:"createdBy"}},
             {$unwind:"$createdBy"},
             {$project:{viewCount:1,videoSize:1,createdBy:1}}
         ])
+         
         res.status(200).json(data);
     }
     catch(err){
