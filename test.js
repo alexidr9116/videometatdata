@@ -33,7 +33,7 @@ describe("get /get-size-by-user/:usernameOrEmailOrMobile",()=>{
 })
 
 describe("get /get-metadata-by-id/:id",()=>{
-    test("should response with a 200 status code",async()=>{
+    test("should response with a 200 status code and video size = 12.4 , view count = 10, crated by = 'user-1'",async()=>{
         const response = await request(app).get("/api/video/get-metadata-by-id/video-1");
        
         expect(response.statusCode).toBe(200);
