@@ -1,8 +1,16 @@
 const request  = require('supertest');
 const app = require('./server');
+const createSeedData = require('./controller/VideoController').createSeedData;
 
 
-describe("post /update",()=>{
+// describe("create seed data",()=>{
+//     test("should response with a 200 status code",async()=>{
+//         createSeedData();
+//     })
+// });
+
+
+describe("patch /update",()=>{
     test("should response with a 200 status code",async()=>{
         const response = await request(app).patch("/api/video/update-metadata").send({
             viewCount:10,
